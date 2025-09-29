@@ -31,8 +31,8 @@ pip install -r requirements.txt
 #.env 파일을 루트에 생성하고 MongoDB 정보를 입력하세요.
 #예시 (.env.example 참고):
 MONGODB_URI=mongodb+srv://<user>:<pass>@<cluster>/<db>?retryWrites=true&w=majority
-MONGODB_DB=rankit
-MONGODB_COLL_SHOP_TREND=shop_search_trend
+MONGODB_DB=****
+MONGODB_COLL_SHOP_TREND=*****
 ```
 
 ### 5. 서버 실행
