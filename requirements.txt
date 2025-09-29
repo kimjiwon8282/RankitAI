@@ -1,0 +1,15 @@
+﻿fastapi==0.116.1
+uvicorn[standard]==0.35.0
+gunicorn==22.0.0
+
+numpy==2.3.2
+pandas==2.3.2
+scikit-learn==1.7.1
+scipy==1.16.1
+joblib==1.5.2
+
+pydantic==2.11.7
+pydantic-settings==2.10.1
+python-dotenv==1.1.1
+pymongo==4.14.1        # 런타임에 Mongo 쓰면 유지, 아니면 제거
+# email-validator, python-multipart  # 폼/업로드/이메일 검증 쓰면 추가

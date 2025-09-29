@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build/Dist
+build/
+dist/
+*.egg-info/
+
+# IDE / Editor
+.idea/
+.vscode/
+
+# Git
+.git
+.gitignore
+.github/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & env
+*.log
+.env
+
+# JS (if any)
+node_modules/
+
+# [중요] 모델은 포함해야 함
+# artifacts/  <-- (무시하지 마세요)

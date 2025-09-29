@@ -1,0 +1,60 @@
+# ---------------------------------
+# Python 관련
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.log
+
+# 가상환경
+.venv/
+env/
+venv/
+
+# 빌드/배포 산출물
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# 캐시 / 테스트
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.tox/
+*.pytest_cache/
+
+# ---------------------------------
+# 데이터/모델 아티팩트
+# 기본적으로 artifacts는 무시하되, 실행 필수 파일은 예외 처리
+artifacts/*
+!artifacts/final_model_ccc2987d/model.pkl
+!artifacts/final_model_ccc2987d/feature_list.json
+!artifacts/final_model_ccc2987d/metrics.json
+
+# 로그/시각화/실험 결과물은 무시
+artifacts/**/*.csv
+artifacts/**/*.png
+
+# ---------------------------------
+# 환경 파일
+.env
+.env.*
+!env.example   # 공유용 샘플만 허용
+
+# 에디터/OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 압축/임시파일
+*.zip
+*.tar
+*.gz
+*.tmp
