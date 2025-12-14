@@ -1,0 +1,58 @@
+{
+  "num_cols": [
+    "lprice",
+    "hprice",
+    "tok_overlap",
+    "tok_jaccard",
+    "tok_lcs_ratio",
+    "sim_char_cosine",
+    "numunit_match_ratio",
+    "title_len_tok",
+    "log_lprice",
+    "log_hprice",
+    "price_spread",
+    "price_spread_ratio",
+    "price_avg",
+    "price_ratio_by_query",
+    "price_z_by_query",
+    "q_in_cat_path",
+    "exact_hit_l1",
+    "exact_hit_l2",
+    "exact_hit_l3",
+    "exact_hit_l4",
+    "brand_in_title",
+    "maker_in_title",
+    "brand_in_cat",
+    "maker_in_cat",
+    "query_title_cat_consistency",
+    "price_ratio_by_cat",
+    "price_z_by_cat"
+  ],
+  "cat_cols": [
+    "mallName",
+    "brand",
+    "maker",
+    "category1",
+    "category2",
+    "category3",
+    "category4"
+  ],
+  "train_groups": 101,
+  "params": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 63,
+    "min_child_samples": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "reg_lambda": 0.1,
+    "objective": "lambdarank",
+    "metric": "ndcg"
+  },
+  "metrics": {
+    "spearman_using_neg_score": -0.25571116253912657,
+    "r2_using_neg_score": -2.953284686515165,
+    "ndcg@10": 0.25827704731536183,
+    "ndcg@20": 0.30634976176532336
+  }
+}

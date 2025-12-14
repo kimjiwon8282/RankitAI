@@ -1,6 +1,9 @@
 # 베이스 이미지 (슬림)
 FROM python:3.11-slim
 
+# (추가) LightGBM이 의존하는 OpenMP 라이브러리 설치
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/*
+
 # 파이썬 런타임 기본 옵션
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

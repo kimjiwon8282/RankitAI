@@ -13,15 +13,17 @@ from pydantic import BaseModel, Field
 import joblib
 
 # 당신의 전처리/피처 모듈
+from fastapi.responses import JSONResponse
 from ml.feature_set_v1 import build_features_v1
 from ml.clean import ensure_columns, coerce_numeric_cols, strip_string_cols
+from ml.loaders import fetch_shop_search_trend_long
 
 # -----------------------
 # 설정
 # -----------------------
 ROOT = Path(__file__).resolve().parents[1]  # 프로젝트 루트
 
-MODEL_DIR =  ROOT / "artifacts" / "final_model_ccc2987d"
+MODEL_DIR = ROOT / "artifacts" / "lgbm_ranker_final"  # <- 변경!
 
 MODEL_PATH = MODEL_DIR / "model.pkl"
 FEATURES_PATH = MODEL_DIR / "feature_list.json"
@@ -55,7 +57,7 @@ class PredictResponseItem(BaseModel):
     # 디버그/트레이싱에 유용
     query: str
     title: str
-    exp_id: str = "ccc2987d"
+    exp_id: str = "lgbm_ranker_final"  # ← 새 모델 버전으로
 
 class PredictResponse(BaseModel):
     results: List[PredictResponseItem]
@@ -120,39 +122,55 @@ def health():
 
 @app.get("/version")
 def version():
-    return {"exp_id": "ccc2987d", "model_path": MODEL_PATH.as_posix()}
+    return {"exp_id": "lgbm_ranker_final", "model_path": MODEL_PATH.as_posix()}  # <- 변경!
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
     pipe, X_cols = _load_model_and_features()
+    user_item = req.items[0]  # 사용자 1개 상품만 받는 구조
+    query = user_item.query
 
-    # 입력 -> 피처 DF
-    feats = _items_to_features([i.model_dump() for i in req.items])
+    # 1. 경쟁상품 200개 불러오기 (query 기준)
+    df_competitors = fetch_shop_search_trend_long(query_filter=[query], limit_docs=1)
+    df_competitors = df_competitors.sort_values("rank").head(200)
 
-    # 학습 때의 X 컬럼만 사용 (순서 유지)
-    missing = [c for c in X_cols if c not in feats.columns]
-    if missing:
-        raise ValueError(f"필요 컬럼 누락: {missing[:10]}...")
+    competitors = df_competitors[RAW_REQUIRED].to_dict(orient="records")
+    
+    # 2. 예외처리: 경쟁상품 너무 적으면 에러 반환
+    if len(competitors) < 30:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": f"해당 검색어 '{query}'의 경쟁상품이 {len(competitors)}개로 예측이 어렵습니다."}
+        )
+    # 3. 사용자 입력 상품 dict로 변환 (누락 컬럼 채우기)
+    user_dict = user_item.model_dump()
+    for k in RAW_REQUIRED:
+        if k not in user_dict:
+            user_dict[k] = ""
+    # 4. 합치기
+    all_items = competitors + [user_dict]
 
+    # 5. 피처 생성
+    feats = _items_to_features(all_items)
     X = feats[X_cols].copy()
 
-    # 예측
-    y_hat = pipe.predict(X)
-    if req.clip_to_range:
-        y_clip = np.clip(y_hat, 1, 200)
-    else:
-        y_clip = y_hat
+    # 6. 예측
+    y_score = pipe.predict(X)
 
-    results = []
-    for i, row in enumerate(req.items):
-        results.append(PredictResponseItem(
-            pred_rank=float(y_hat[i]),
-            pred_rank_clipped=float(y_clip[i]),
-            query=row.query,
-            title=row.title
-        ))
+    # 7. 점수 내림차순 정렬 → 랭킹 계산
+    order = np.argsort(-y_score)
+    user_index = len(all_items) - 1
+    rank = int(np.where(order == user_index)[0][0]) + 1  # 1-based rank
 
-    return PredictResponse(results=results, n=len(results))
+    # 8. 결과 생성 (요청 상품만)
+    results = [PredictResponseItem(
+        pred_rank=float(rank),
+        pred_rank_clipped=float(rank),  # 클리핑 의미없음
+        query=user_item.query,
+        title=user_item.title
+    )]
+
+    return PredictResponse(results=results, n=1)
 
 # === 실행 엔트리포인트 추가 ===
 if __name__ == "__main__":
